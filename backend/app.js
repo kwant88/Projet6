@@ -1,15 +1,20 @@
-const express = require('express');
-const mongoose = require('mongoose');
+const express = require("express");
+const bcrypt = require("bcrypt");
+const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+const auth = require("./middleware/auth");
+const userRoutes = require("./routes/user")
+const sauceRoutes = require("./routes/sauces")
+const path = require("path")
+//Pour se connecter à la BDD
+mongoose
+  .connect(
+    "mongodb+srv://piiquante:piiquante@cluster0.kjh9q.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+  )
+  .then(() => console.log("Connecté à MongoDB"))
+  .catch(() => console.log("Pas bien"));
+
 const app = express();
-
-
-mongoose.connect('mongodb+srv://kwant8888:<password>@cluster0.qu9uo.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
-  { useNewUrlParser: true,
-    useUnifiedTopology: true })
-  .then(() => console.log('Connexion à MongoDB réussie !'))
-  .catch(() => console.log('Connexion à MongoDB échouée !'));
-
-// Middleware permettant au front et back end de communiquer entre eux
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -18,23 +23,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use((req, res, next) => {
-  console.log('Requête reçue !');
-  next();
-});
-
-app.use((req, res, next) => {
-  res.status(201);
-  next();
-});
-
-app.use((req, res, next) => {
-  res.json({ message: 'Votre requête a bien été reçue !' });
-  next();
-});
-
-app.use((req, res, next) => {
-  console.log('Réponse envoyée avec succès !');
-});
-
+app.use(express.json());
+// Routes d'API
+app.use("/api/auth",userRoutes);
+app.use("/api/sauces",sauceRoutes);
+app.use("/images",express.static(path.join(__dirname,"images"))); //chemin statique images
 module.exports = app;
